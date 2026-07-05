@@ -1039,7 +1039,8 @@ function handleFilePick(e){
   const file=e.target.files[0];
   const id=settingsCharId;
   if(!file||id==null) return;
-  closeSettings();
+  settingsModal.classList.remove('show');
+  settingsCharId=null;
   e.target.value='';
   const reader=new FileReader();
   reader.onload=ev=>{openAdjustModal(id,ev.target.result)};
