@@ -844,7 +844,9 @@ function renderPlayers(){
     card.dataset.idx=i;
     const av=document.createElement('div');
     av.className=`mini-avatar ${cd.cls}`;
+    av.style.cursor='pointer';
     av.innerHTML=`<div class="char-inner">${charInnerHTML(cd.cls,p.charId)}</div>`;
+    av.addEventListener('click',()=>openSettings(p.charId));
     const gd=document.createElement('div');
     gd.className='gesture-display';
     const st=document.createElement('div');
@@ -996,10 +998,13 @@ const settingsGrid=document.getElementById('settings-grid');
 const settingsActions=document.getElementById('settings-actions');
 let settingsCharId=null;
 
-function openSettings(){
+function openSettings(charId){
   renderSettingsGrid();
   settingsActions.classList.remove('show');
   settingsCharId=null;
+  if(charId!=null){
+    selectSettingsChar(charId);
+  }
   overlay.classList.add('show');
   settingsModal.classList.add('show');
 }
