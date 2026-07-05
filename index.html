@@ -33,7 +33,7 @@ body::before{
   pointer-events:none;z-index:0;
 }
 
-header{text-align:center;position:relative;z-index:1;width:100%;padding:10px 0 4px}
+header{text-align:center;position:relative;z-index:1;width:100%;padding:10px 0 4px;min-height:46px}
 h1{
   font-size:1.8rem;font-weight:900;
   color:#FFD700;text-shadow:
@@ -45,6 +45,15 @@ h1{
 h1::before{content:'⚡';margin-right:6px}
 h1::after{content:'⚡';margin-left:6px}
 .subtitle{font-size:.65rem;color:#FF8A5C;letter-spacing:4px;text-transform:uppercase;margin-top:-4px;opacity:.8}
+
+#settings-btn{
+  position:absolute;top:8px;right:8px;width:36px;height:36px;
+  border-radius:50%;border:none;background:rgba(255,255,255,.08);
+  font-size:1.2rem;cursor:pointer;transition:background .15s;
+  display:flex;align-items:center;justify-content:center;
+  z-index:2;
+}
+#settings-btn:active{background:rgba(255,255,255,.15)}
 
 .sec-title{font-size:.7rem;color:#FFD700;letter-spacing:2px;text-align:center;padding:3px 0;opacity:.5;width:100%}
 
@@ -527,39 +536,69 @@ h1::after{content:'⚡';margin-left:6px}
   100%{opacity:0;transform:translateY(-60px) rotate(360deg) scale(.3)}
 }
 
-/* ===== overlay & menu ===== */
+/* ===== overlay ===== */
 .overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.6);
   z-index:50;opacity:0;transition:opacity .2s;pointer-events:none;
 }
 .overlay.show{opacity:1;pointer-events:auto}
 
-#char-menu{
-  position:fixed;bottom:0;left:0;right:0;z-index:60;
-  background:rgba(30,30,50,.95);backdrop-filter:blur(12px);
-  border-radius:20px 20px 0 0;padding:16px 20px 30px;
+/* ===== settings modal ===== */
+#settings-modal{
+  position:fixed;top:50%;left:50%;z-index:60;
+  transform:translate(-50%,-50%);
+  width:calc(100% - 32px);max-width:400px;max-height:80vh;
+  background:rgba(20,20,40,.97);backdrop-filter:blur(16px);
+  border-radius:24px;padding:20px;
+  border:1px solid rgba(255,255,255,.08);
   opacity:0;visibility:hidden;
   transition:opacity .25s,visibility .25s;
+  display:flex;flex-direction:column;
 }
-#char-menu.show{opacity:1;visibility:visible}
-#char-menu .menu-title{font-size:.85rem;color:rgba(255,255,255,.4);text-align:center;margin-bottom:12px}
-#char-menu .menu-item{
-  display:flex;align-items:center;gap:12px;
-  padding:14px 12px;border-radius:12px;cursor:pointer;
-  transition:background .15s;font-size:1rem;
-  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
+#settings-modal.show{opacity:1;visibility:visible}
+.settings-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:14px;
 }
-#char-menu .menu-item:active{background:rgba(255,255,255,.08)}
-#char-menu .menu-item .icon{font-size:1.3rem;width:32px;text-align:center}
-#char-menu .menu-item .label{color:#F5F5F5}
-#char-menu .menu-cancel{
-  margin-top:10px;padding:14px;border-radius:12px;
-  background:rgba(255,255,255,.06);text-align:center;
-  cursor:pointer;color:rgba(255,255,255,.5);transition:background .15s;
-  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
+.settings-title{font-size:1rem;color:#FFD700;font-weight:bold}
+.settings-close{
+  width:32px;height:32px;border-radius:50%;border:none;
+  background:rgba(255,255,255,.1);color:#fff;font-size:1rem;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
 }
-#char-menu .menu-cancel:active{background:rgba(255,255,255,.1)}
-/* file inputs at root level */
+#settings-grid{
+  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
+  padding:8px;overflow-y:auto;flex:1;
+  min-height:0;
+}
+.settings-char{
+  width:58px;height:58px;border-radius:50%;
+  position:relative;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .2s,filter .2s;flex-shrink:0;
+}
+.settings-char:active{transform:scale(.9)}
+.settings-char.active .char-inner{
+  border:3px solid #FFD700;box-shadow:0 0 12px rgba(255,215,0,.4);
+}
+#settings-actions{
+  display:none;gap:8px;justify-content:center;
+  margin-top:14px;padding-top:14px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+#settings-actions.show{display:flex;flex-wrap:wrap}
+.set-btn{
+  padding:10px 16px;border-radius:12px;border:none;
+  font-size:.85rem;cursor:pointer;transition:all .15s;
+  user-select:none;-webkit-user-select:none;
+}
+.set-btn:active{transform:scale(.94)}
+.set-btn.cam{background:rgba(46,204,113,.2);color:#2ECC71}
+.set-btn.cam:active{background:rgba(46,204,113,.3)}
+.set-btn.gal{background:rgba(52,152,219,.2);color:#3498DB}
+.set-btn.gal:active{background:rgba(52,152,219,.3)}
+.set-btn.reset{background:rgba(255,255,255,.08);color:rgba(255,255,255,.5)}
+.set-btn.reset:active{background:rgba(255,255,255,.12)}
 
 /* ===== image adjust modal ===== */
 #adjust-modal{
@@ -630,6 +669,7 @@ h1::after{content:'⚡';margin-left:6px}
 <header>
   <h1>公平猜拳</h1>
   <div class="subtitle">みんなで勝負</div>
+  <button id="settings-btn" onclick="openSettings()">⚙️</button>
 </header>
 
 <div id="prompt"></div>
@@ -660,25 +700,21 @@ h1::after{content:'⚡';margin-left:6px}
 
 <div class="overlay" id="overlay"></div>
 
-<div id="char-menu">
-  <div class="menu-title">編輯角色頭像</div>
-  <label class="menu-item" for="camPick">
-    <span class="icon">📷</span>
-    <span class="label">拍照</span>
-  </label>
-  <label class="menu-item" for="galPick">
-    <span class="icon">🖼️</span>
-    <span class="label">從相簿選擇</span>
-  </label>
-  <div class="menu-item" data-action="reset">
-    <span class="icon">🔄</span>
-    <span class="label">回到預設</span>
-  </div>
-  <div class="menu-cancel" data-action="cancel">取消</div>
-</div>
-
 <input type="file" accept="image/*" capture="environment" id="camPick" style="display:none">
 <input type="file" accept="image/*" id="galPick" style="display:none">
+
+<div id="settings-modal">
+  <div class="settings-header">
+    <span class="settings-title">⚙️ 角色設定</span>
+    <button class="settings-close" id="settings-close">✕</button>
+  </div>
+  <div id="settings-grid"></div>
+  <div id="settings-actions">
+    <label class="set-btn cam" for="camPick">📷 拍照</label>
+    <label class="set-btn gal" for="galPick">🖼️ 從相簿選擇</label>
+    <button class="set-btn reset" id="settings-reset">🔄 回到預設</button>
+  </div>
+</div>
 
 <div id="adjust-modal">
   <div class="modal-bg" id="modal-bg-close"></div>
@@ -718,7 +754,6 @@ const G_EMOJI = {rock:'✊',paper:'✋',scissors:'✌️'};
 let state = {
   phase:'select',curPlayer:0,players:[],
   availChars:CHAR_DATA.map(c=>c.id),selCharId:null,
-  menuCharId:null,adjustCharId:null,
 };
 
 const poolEl=document.getElementById('char-pool');
@@ -733,9 +768,8 @@ const replayBtn=document.getElementById('replay-btn');
 
 /* ---- image related ---- */
 const overlay=document.getElementById('overlay');
-const charMenu=document.getElementById('char-menu');
-const fileCamera=document.getElementById('fileCamera');
-const fileGallery=document.getElementById('fileGallery');
+const camPick=document.getElementById('camPick');
+const galPick=document.getElementById('galPick');
 const adjustModal=document.getElementById('adjust-modal');
 const previewImg=document.getElementById('preview-img');
 const zoomSlider=document.getElementById('zoom-slider');
@@ -791,7 +825,6 @@ function renderPool(){
     if(!state.availChars.includes(c.id)) div.classList.add('picked');
     div.innerHTML=`<div class="char-inner">${charInnerHTML(c.cls,c.id)}</div>`;
     div.addEventListener('click',()=>onCharClick(c.id));
-    setupLongPress(div,c.id);
     poolEl.appendChild(div);
   });
 }
@@ -957,67 +990,72 @@ function spawnStars(count){
   }
 }
 
-/* ====== long press ====== */
-function setupLongPress(el,id){
-  let timer;
-  const start=(e)=>{
-    if(state.phase!=='select') return;
-    if(!state.availChars.includes(id)) return;
-    timer=setTimeout(()=>{
-      timer=null;
-      openCharMenu(id);
-    },400);
-  };
-  const end=()=>{
-    if(timer){clearTimeout(timer);timer=null}
-  };
-  el.addEventListener('touchstart',start,{passive:true});
-  el.addEventListener('touchend',end);
-  el.addEventListener('touchmove',end);
-  el.addEventListener('mousedown',start);
-  el.addEventListener('mouseup',end);
-  el.addEventListener('mouseleave',end);
-}
+/* ====== settings ====== */
+const settingsModal=document.getElementById('settings-modal');
+const settingsGrid=document.getElementById('settings-grid');
+const settingsActions=document.getElementById('settings-actions');
+let settingsCharId=null;
 
-/* ====== char menu ====== */
-function openCharMenu(id){
-  state.menuCharId=id;
+function openSettings(){
+  renderSettingsGrid();
+  settingsActions.classList.remove('show');
+  settingsCharId=null;
   overlay.classList.add('show');
-  charMenu.classList.add('show');
+  settingsModal.classList.add('show');
 }
 
-function closeCharMenu(){
+function closeSettings(){
   overlay.classList.remove('show');
-  charMenu.classList.remove('show');
-  state.menuCharId=null;
+  settingsModal.classList.remove('show');
+  settingsCharId=null;
 }
 
-overlay.addEventListener('click',closeCharMenu);
+function renderSettingsGrid(){
+  settingsGrid.innerHTML='';
+  CHAR_DATA.forEach(c=>{
+    const div=document.createElement('div');
+    div.className=`settings-char ${c.cls}`;
+    div.dataset.id=c.id;
+    div.innerHTML=`<div class="char-inner">${charInnerHTML(c.cls,c.id)}</div>`;
+    div.addEventListener('click',()=>selectSettingsChar(c.id));
+    settingsGrid.appendChild(div);
+  });
+}
+
+function selectSettingsChar(id){
+  settingsCharId=id;
+  settingsGrid.querySelectorAll('.settings-char').forEach(el=>{
+    el.classList.toggle('active',parseInt(el.dataset.id)===id);
+  });
+  settingsActions.classList.add('show');
+}
 
 function handleFilePick(e){
   const file=e.target.files[0];
-  const id=state.menuCharId;
+  const id=settingsCharId;
   if(!file||id==null) return;
-  closeCharMenu();
+  closeSettings();
   e.target.value='';
   const reader=new FileReader();
   reader.onload=ev=>{openAdjustModal(id,ev.target.result)};
   reader.readAsDataURL(file);
 }
 
+overlay.addEventListener('click',()=>{
+  closeSettings();
+  closeAdjustModal(false);
+});
 camPick.addEventListener('change',handleFilePick);
 galPick.addEventListener('change',handleFilePick);
 
-charMenu.addEventListener('click',e=>{
-  const item=e.target.closest('[data-action]');
-  if(!item) return;
-  const action=item.dataset.action;
-  if(action==='cancel'){closeCharMenu();return}
-  if(action==='reset'){
-    closeCharMenu();
-    removeCustom(state.menuCharId);
-    renderPool();renderPlayers();
-  }
+document.getElementById('settings-close').addEventListener('click',closeSettings);
+document.getElementById('settings-reset').addEventListener('click',()=>{
+  if(settingsCharId==null) return;
+  removeCustom(settingsCharId);
+  renderSettingsGrid();
+  settingsActions.classList.remove('show');
+  settingsCharId=null;
+  renderPool();renderPlayers();
 });
 
 /* ====== adjust modal ====== */
