@@ -619,10 +619,7 @@ h1::after{content:'⚡';margin-left:6px}
 }
 #adjust-modal .modal-btns .btn-confirm:active{transform:scale(.96)}
 
-.file-hidden{
-  position:fixed;opacity:0;pointer-events:none;
-  width:1px;height:1px;z-index:-1;
-}
+#camInput,#galInput{display:none}
 </style>
 </head>
 <body>
@@ -661,18 +658,19 @@ h1::after{content:'⚡';margin-left:6px}
 
 <div class="overlay" id="overlay"></div>
 
+<input type="file" accept="image/*" capture="environment" id="camInput" style="display:none">
+<input type="file" accept="image/*" id="galInput" style="display:none">
+
 <div id="char-menu">
   <div class="menu-title">編輯角色頭像</div>
-  <label class="menu-item" id="menu-camera" for="cam-input">
+  <label class="menu-item" for="camInput">
     <span class="icon">📷</span>
     <span class="label">拍照</span>
   </label>
-  <label class="menu-item" id="menu-gallery" for="gal-input">
+  <label class="menu-item" for="galInput">
     <span class="icon">🖼️</span>
     <span class="label">從相簿選擇</span>
   </label>
-  <input type="file" accept="image/*" capture="environment" id="cam-input" class="file-hidden">
-  <input type="file" accept="image/*" id="gal-input" class="file-hidden">
   <div class="menu-item" data-action="reset">
     <span class="icon">🔄</span>
     <span class="label">回到預設</span>
@@ -734,8 +732,8 @@ const replayBtn=document.getElementById('replay-btn');
 /* ---- image related ---- */
 const overlay=document.getElementById('overlay');
 const charMenu=document.getElementById('char-menu');
-const camInput=document.getElementById('cam-input');
-const galInput=document.getElementById('gal-input');
+const camInput=document.getElementById('camInput');
+const galInput=document.getElementById('galInput');
 const adjustModal=document.getElementById('adjust-modal');
 const previewImg=document.getElementById('preview-img');
 const zoomSlider=document.getElementById('zoom-slider');
@@ -1007,7 +1005,7 @@ charMenu.addEventListener('click',e=>{
   }
 });
 
-function handleFilePick(e,src){
+function handleFileChange(e){
   const file=e.target.files[0];
   if(!file||state.menuCharId==null) return;
   const id=state.menuCharId;
@@ -1019,10 +1017,8 @@ function handleFilePick(e,src){
   };
   reader.readAsDataURL(file);
 }
-camInput.addEventListener('change',e=>handleFilePick(e,'camera'));
-galInput.addEventListener('change',e=>handleFilePick(e,'gallery'));
-document.getElementById('menu-camera').addEventListener('click',()=>{state.pendingCharId=state.menuCharId});
-document.getElementById('menu-gallery').addEventListener('click',()=>{state.pendingCharId=state.menuCharId});
+camInput.addEventListener('change',handleFileChange);
+galInput.addEventListener('change',handleFileChange);
 
 /* ====== adjust modal ====== */
 let adjustState={id:null,dataUrl:null,zoom:1,px:50,py:50};
