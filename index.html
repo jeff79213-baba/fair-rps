@@ -48,7 +48,7 @@ h1::after{content:'⚡';margin-left:6px}
 
 .sec-title{font-size:.7rem;color:#FFD700;letter-spacing:2px;text-align:center;padding:3px 0;opacity:.5;width:100%}
 
-/* ===== character pool - grid ===== */
+/* ===== character pool ===== */
 #char-pool{
   display:flex;flex-wrap:wrap;justify-content:center;
   gap:8px;padding:6px;
@@ -72,16 +72,17 @@ h1::after{content:'⚡';margin-left:6px}
 }
 .char-inner{
   width:58px;height:58px;border-radius:50%;position:relative;
-  overflow:hidden;
-  transition:border-color .2s;
+  overflow:hidden;transition:border-color .2s;
 }
 .char:not(.picked):hover .char-inner{filter:brightness(1.15)}
 
-/* ===== face building blocks ===== */
-.face-body{
-  position:absolute;inset:0;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
+/* custom image face */
+.custom-face{
+  width:100%;height:100%;border-radius:50%;
+  position:absolute;inset:0;z-index:4;
 }
+
+/* ===== face building blocks ===== */
 .skin{
   width:42px;height:42px;border-radius:50%;position:absolute;
   z-index:1;top:50%;left:50%;transform:translate(-50%,-50%);
@@ -101,7 +102,7 @@ h1::after{content:'⚡';margin-left:6px}
 .mouth{position:absolute;z-index:4;border-radius:50%}
 .accessory{position:absolute;z-index:5}
 
-/* ===== c0 - 小女孩 ===== */
+/* c0 - 小女孩 */
 .c0 .char-inner{background:linear-gradient(135deg,#FF9EBB,#E87A9F)}
 .c0 .skin{background:#FDE8D0;width:40px;height:38px;top:54%}
 .c0 .hair{
@@ -126,7 +127,7 @@ h1::after{content:'⚡';margin-left:6px}
   border-bottom:2px solid #D45A5A;border-radius:0 0 50% 50%;
 }
 
-/* ===== c1 - 少年 ===== */
+/* c1 - 少年 */
 .c1 .char-inner{background:linear-gradient(135deg,#74B9FF,#5A9FE6)}
 .c1 .skin{background:#F5D6B8;width:40px;height:38px;top:54%}
 .c1 .hair{
@@ -145,7 +146,7 @@ h1::after{content:'⚡';margin-left:6px}
   border-bottom:2px solid #D47A5A;border-radius:0 0 50% 50%;
 }
 
-/* ===== c2 - 少女 ===== */
+/* c2 - 少女 */
 .c2 .char-inner{background:linear-gradient(135deg,#A29BFE,#8A84E6)}
 .c2 .skin{background:#FDE8D0;width:40px;height:40px;top:52%}
 .c2 .hair{
@@ -168,7 +169,7 @@ h1::after{content:'⚡';margin-left:6px}
   border-bottom:2px solid #D47A6A;border-radius:0 0 50% 50%;
 }
 
-/* ===== c3 - 老奶奶 ===== */
+/* c3 - 老奶奶 */
 .c3 .char-inner{background:linear-gradient(135deg,#D4A574,#C08D5A)}
 .c3 .skin{background:#D4A574;width:40px;height:38px;top:54%}
 .c3 .hair{
@@ -184,8 +185,7 @@ h1::after{content:'⚡';margin-left:6px}
 .c3 .eye::after{display:none}
 .c3 .glasses{
   top:20px;left:50%;transform:translateX(-50%);
-  width:28px;height:10px;border:1.5px solid #8B7355;border-radius:50%;
-  z-index:6;
+  width:28px;height:10px;border:1.5px solid #8B7355;border-radius:50%;z-index:6;
 }
 .c3 .mouth{
   top:31px;width:6px;height:3px;border-bottom:1.5px solid #A08060;
@@ -197,7 +197,7 @@ h1::after{content:'⚡';margin-left:6px}
   box-shadow:16px 0 0 0 #C09070;
 }
 
-/* ===== c4 - 老爺爺 ===== */
+/* c4 - 老爺爺 */
 .c4 .char-inner{background:linear-gradient(135deg,#6B8E5A,#5A7A4A)}
 .c4 .skin{background:#D4A574;width:38px;height:42px;top:52%}
 .c4 .hair{
@@ -217,8 +217,7 @@ h1::after{content:'⚡';margin-left:6px}
 .c4 .eye::after{display:none}
 .c4 .glasses{
   top:19px;left:50%;transform:translateX(-50%);
-  width:30px;height:12px;border:1.5px solid #8B7355;border-radius:4px;
-  z-index:6;
+  width:30px;height:12px;border:1.5px solid #8B7355;border-radius:4px;z-index:6;
 }
 .c4 .mustache{
   position:absolute;top:28px;left:50%;transform:translateX(-50%);
@@ -238,7 +237,7 @@ h1::after{content:'⚡';margin-left:6px}
   background:#C0C0C0;z-index:7;transform:rotate(-10deg);
 }
 
-/* ===== c5 - 中年漁夫 ===== */
+/* c5 - 漁夫 */
 .c5 .char-inner{background:linear-gradient(135deg,#2D9DB5,#25839E)}
 .c5 .skin{background:#D4A574;width:40px;height:40px;top:52%}
 .c5 .hair{display:none}
@@ -267,14 +266,13 @@ h1::after{content:'⚡';margin-left:6px}
   border-bottom:1.5px solid #A08060;border-radius:0 0 50% 50%;
 }
 
-/* ===== c6 - 中年屠夫 ===== */
+/* c6 - 屠夫 */
 .c6 .char-inner{background:linear-gradient(135deg,#C44545,#B03A3A)}
 .c6 .skin{background:#D4A574;width:42px;height:40px;top:54%}
 .c6 .hair{display:none}
 .c6 .bandana{
   position:absolute;top:2px;left:50%;transform:translateX(-50%);
-  width:54px;height:16px;background:#E74C3C;z-index:6;
-  border-radius:4px;
+  width:54px;height:16px;background:#E74C3C;z-index:6;border-radius:4px;
 }
 .c6 .bandana::after{
   content:'';position:absolute;bottom:-6px;right:-2px;
@@ -296,7 +294,7 @@ h1::after{content:'⚡';margin-left:6px}
   border-bottom:2px solid #A06050;border-radius:0 0 50% 50%;
 }
 
-/* ===== c7 - 農夫 ===== */
+/* c7 - 農夫 */
 .c7 .char-inner{background:linear-gradient(135deg,#F5CD79,#E8BA60)}
 .c7 .skin{background:#E8C49A;width:40px;height:38px;top:54%}
 .c7 .hair{display:none}
@@ -324,7 +322,7 @@ h1::after{content:'⚡';margin-left:6px}
   background:rgba(220,100,80,.25);border-radius:50%;z-index:3;
 }
 
-/* ===== c8 - 旅人 ===== */
+/* c8 - 旅人 */
 .c8 .char-inner{background:linear-gradient(135deg,#4A69BD,#3A559E)}
 .c8 .skin{background:#F0D5B8;width:36px;height:38px;top:52%}
 .c8 .hair{display:none}
@@ -349,7 +347,7 @@ h1::after{content:'⚡';margin-left:6px}
   width:24px;height:3px;background:#8B7355;border-radius:2px;z-index:7;
 }
 
-/* ===== c9 - 母親 ===== */
+/* c9 - 母親 */
 .c9 .char-inner{background:linear-gradient(135deg,#E1B12C,#D4A020)}
 .c9 .skin{background:#FDE8D0;width:40px;height:40px;top:52%}
 .c9 .hair{
@@ -528,6 +526,98 @@ h1::after{content:'⚡';margin-left:6px}
   0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}
   100%{opacity:0;transform:translateY(-60px) rotate(360deg) scale(.3)}
 }
+
+/* ===== overlay & menu ===== */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:50;opacity:0;transition:opacity .2s;pointer-events:none;
+}
+.overlay.show{opacity:1;pointer-events:auto}
+
+#char-menu{
+  position:fixed;bottom:0;left:0;right:0;z-index:60;
+  background:rgba(30,30,50,.95);backdrop-filter:blur(12px);
+  border-radius:20px 20px 0 0;padding:16px 20px 30px;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+#char-menu.show{transform:translateY(0)}
+#char-menu .menu-title{font-size:.85rem;color:rgba(255,255,255,.4);text-align:center;margin-bottom:12px}
+#char-menu .menu-item{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 12px;border-radius:12px;cursor:pointer;
+  transition:background .15s;font-size:1rem;
+}
+#char-menu .menu-item:active{background:rgba(255,255,255,.08)}
+#char-menu .menu-item .icon{font-size:1.3rem;width:32px;text-align:center}
+#char-menu .menu-item .label{color:#F5F5F5}
+#char-menu .menu-cancel{
+  margin-top:10px;padding:14px;border-radius:12px;
+  background:rgba(255,255,255,.06);text-align:center;
+  cursor:pointer;color:rgba(255,255,255,.5);transition:background .15s;
+}
+#char-menu .menu-cancel:active{background:rgba(255,255,255,.1)}
+
+/* ===== image adjust modal ===== */
+#adjust-modal{
+  position:fixed;inset:0;z-index:70;
+  display:none;align-items:center;justify-content:center;
+  padding:20px;
+}
+#adjust-modal.show{display:flex}
+#adjust-modal .modal-bg{
+  position:absolute;inset:0;background:rgba(0,0,0,.8);z-index:0;
+}
+#adjust-modal .modal-box{
+  position:relative;z-index:1;width:100%;max-width:380px;
+  background:rgba(25,25,45,.95);backdrop-filter:blur(16px);
+  border-radius:24px;padding:24px;border:1px solid rgba(255,255,255,.08);
+}
+#adjust-modal .modal-title{
+  font-size:1rem;color:#FFD700;text-align:center;margin-bottom:16px;
+  font-weight:bold;
+}
+#preview-wrap{
+  width:200px;height:200px;border-radius:50%;overflow:hidden;
+  margin:0 auto 16px;position:relative;
+  border:3px solid rgba(255,215,0,.3);
+  background:#1a1a2e;
+}
+#preview-img{
+  width:100%;height:100%;position:absolute;inset:0;
+  background-size:cover;background-position:center;background-repeat:no-repeat;
+  cursor:grab;
+}
+#preview-img.dragging{cursor:grabbing}
+#adjust-modal .zoom-area{
+  display:flex;align-items:center;gap:10px;margin-bottom:18px;
+}
+#adjust-modal .zoom-area label{font-size:.8rem;color:rgba(255,255,255,.5);white-space:nowrap}
+#adjust-modal .zoom-area input[type=range]{
+  flex:1;-webkit-appearance:none;height:4px;
+  background:rgba(255,255,255,.15);border-radius:2px;outline:none;
+}
+#adjust-modal .zoom-area input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:20px;height:20px;
+  background:linear-gradient(135deg,#FFD700,#FF6B00);
+  border-radius:50%;cursor:pointer;border:2px solid rgba(255,255,255,.3);
+}
+#adjust-modal .modal-btns{
+  display:flex;gap:10px;
+}
+#adjust-modal .modal-btns button{
+  flex:1;padding:12px;border-radius:14px;border:none;
+  cursor:pointer;font-size:.9rem;transition:all .15s;
+}
+#adjust-modal .modal-btns .btn-cancel{
+  background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);
+}
+#adjust-modal .modal-btns .btn-cancel:active{background:rgba(255,255,255,.12)}
+#adjust-modal .modal-btns .btn-confirm{
+  background:linear-gradient(135deg,#FF6B00,#FF4500);color:#FFF;font-weight:bold;
+}
+#adjust-modal .modal-btns .btn-confirm:active{transform:scale(.96)}
+
+#file-input{display:none}
 </style>
 </head>
 <body>
@@ -564,6 +654,46 @@ h1::after{content:'⚡';margin-left:6px}
 
 </div>
 
+<input type="file" id="file-input" accept="image/*">
+
+<div class="overlay" id="overlay"></div>
+
+<div id="char-menu">
+  <div class="menu-title">編輯角色頭像</div>
+  <div class="menu-item" data-action="camera">
+    <span class="icon">📷</span>
+    <span class="label">拍照</span>
+  </div>
+  <div class="menu-item" data-action="gallery">
+    <span class="icon">🖼️</span>
+    <span class="label">從相簿選擇</span>
+  </div>
+  <div class="menu-item" data-action="reset">
+    <span class="icon">🔄</span>
+    <span class="label">回到預設</span>
+  </div>
+  <div class="menu-cancel" data-action="cancel">取消</div>
+</div>
+
+<div id="adjust-modal">
+  <div class="modal-bg" id="modal-bg-close"></div>
+  <div class="modal-box">
+    <div class="modal-title">📐 調整頭像位置</div>
+    <div id="preview-wrap">
+      <div id="preview-img"></div>
+    </div>
+    <div class="zoom-area">
+      <label>🔍 縮放</label>
+      <input type="range" id="zoom-slider" min="1" max="3" step="0.05" value="1">
+      <span id="zoom-label" style="font-size:.75rem;color:rgba(255,255,255,.3);min-width:32px">1x</span>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" id="adjust-cancel">取消</button>
+      <button class="btn-confirm" id="adjust-confirm">✓ 確認使用</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const CHAR_DATA = [
   {id:0,bg:'#FF9EBB',cls:'c0'},
@@ -579,11 +709,11 @@ const CHAR_DATA = [
 ];
 
 const G_EMOJI = {rock:'✊',paper:'✋',scissors:'✌️'};
-const G_BEATS = {rock:'scissors',scissors:'paper',paper:'rock'};
 
 let state = {
   phase:'select',curPlayer:0,players:[],
   availChars:CHAR_DATA.map(c=>c.id),selCharId:null,
+  menuCharId:null,adjustCharId:null,
 };
 
 const poolEl=document.getElementById('char-pool');
@@ -595,6 +725,32 @@ const dbEl=document.getElementById('db-progress');
 const revealBtn=document.getElementById('reveal-btn');
 const resultMsg=document.getElementById('result-msg');
 const replayBtn=document.getElementById('replay-btn');
+
+/* ---- image related ---- */
+const fileInput=document.getElementById('file-input');
+const overlay=document.getElementById('overlay');
+const charMenu=document.getElementById('char-menu');
+const adjustModal=document.getElementById('adjust-modal');
+const previewImg=document.getElementById('preview-img');
+const zoomSlider=document.getElementById('zoom-slider');
+const zoomLabel=document.getElementById('zoom-label');
+
+function lsKey(id){return 'fair-rps-char-'+id}
+
+function getCustom(id){
+  try{
+    const raw=localStorage.getItem(lsKey(id));
+    return raw?JSON.parse(raw):null;
+  }catch(e){return null}
+}
+
+function setCustom(id,data){
+  localStorage.setItem(lsKey(id),JSON.stringify(data));
+}
+
+function removeCustom(id){
+  localStorage.removeItem(lsKey(id));
+}
 
 const CHAR_HTML = {
 c0:`<div class="hair"></div><div class="hair-bow accessory"></div><div class="skin"></div><div class="eye-pair"><div class="eye"></div><div class="eye"></div></div><div class="mouth"></div>`,
@@ -609,7 +765,16 @@ c8:`<div class="hood accessory"></div><div class="hood-opening"></div><div class
 c9:`<div class="hair"></div><div class="hair-wave"></div><div class="skin"></div><div class="eye-pair"><div class="eye"></div><div class="eye"></div></div><div class="mouth"></div>`,
 };
 
-function charInnerHTML(cls){return CHAR_HTML[cls]||''}
+function charInnerHTML(cls,id){
+  const c=getCustom(id);
+  if(c&&c.dataUrl){
+    const z=c.zoom||1;
+    const px=c.px||50;
+    const py=c.py||50;
+    return `<div class="custom-face" style="background:url('${c.dataUrl}') ${px}% ${py}%/ ${z*100}% auto no-repeat"></div>`;
+  }
+  return CHAR_HTML[cls]||'';
+}
 
 function renderPool(){
   poolEl.innerHTML='';
@@ -618,8 +783,9 @@ function renderPool(){
     div.className=`char ${c.cls}`;
     div.dataset.id=c.id;
     if(!state.availChars.includes(c.id)) div.classList.add('picked');
-    div.innerHTML=`<div class="char-inner">${charInnerHTML(c.cls)}</div>`;
+    div.innerHTML=`<div class="char-inner">${charInnerHTML(c.cls,c.id)}</div>`;
     div.addEventListener('click',()=>onCharClick(c.id));
+    setupLongPress(div,c.id);
     poolEl.appendChild(div);
   });
 }
@@ -639,7 +805,7 @@ function renderPlayers(){
     card.dataset.idx=i;
     const av=document.createElement('div');
     av.className=`mini-avatar ${cd.cls}`;
-    av.innerHTML=`<div class="char-inner">${charInnerHTML(cd.cls)}</div>`;
+    av.innerHTML=`<div class="char-inner">${charInnerHTML(cd.cls,p.charId)}</div>`;
     const gd=document.createElement('div');
     gd.className='gesture-display';
     const st=document.createElement('div');
@@ -696,8 +862,8 @@ function determineWinner(){
   else if(u.includes('paper')&&u.includes('rock')) w='paper';
   else return {type:'tie',msg:'🤝 平手！'};
   const wIds=state.players.filter(p=>p.gesture===w).map(p=>p.charId);
-  if(wIds.length===1) return {type:'winners',winnerIds:wIds,msg:`👑 勝利者出現了！戰鬥力 ∞`};
-  return {type:'winners',winnerIds:wIds,msg:`👑 ${wIds.length}人勝利！全員超級賽亞人`};
+  if(wIds.length===1) return {type:'winners',winnerIds:wIds,msg:`👑 勝利者出現了！`};
+  return {type:'winners',winnerIds:wIds,msg:`👑 ${wIds.length}人勝利！`};
 }
 
 function onCharClick(id){
@@ -785,6 +951,180 @@ function spawnStars(count){
   }
 }
 
+/* ====== long press ====== */
+function setupLongPress(el,id){
+  let timer;
+  const start=(e)=>{
+    if(state.phase!=='select') return;
+    if(!state.availChars.includes(id)) return;
+    timer=setTimeout(()=>{
+      timer=null;
+      openCharMenu(id);
+    },400);
+  };
+  const end=()=>{
+    if(timer){clearTimeout(timer);timer=null}
+  };
+  el.addEventListener('touchstart',start,{passive:true});
+  el.addEventListener('touchend',end);
+  el.addEventListener('touchmove',end);
+  el.addEventListener('mousedown',start);
+  el.addEventListener('mouseup',end);
+  el.addEventListener('mouseleave',end);
+}
+
+/* ====== char menu ====== */
+function openCharMenu(id){
+  state.menuCharId=id;
+  overlay.classList.add('show');
+  charMenu.classList.add('show');
+}
+
+function closeCharMenu(){
+  overlay.classList.remove('show');
+  charMenu.classList.remove('show');
+  state.menuCharId=null;
+}
+
+overlay.addEventListener('click',closeCharMenu);
+
+charMenu.addEventListener('click',e=>{
+  const item=e.target.closest('[data-action]');
+  if(!item) return;
+  const action=item.dataset.action;
+  const id=state.menuCharId;
+  closeCharMenu();
+  if(action==='cancel') return;
+  if(action==='reset'){
+    removeCustom(id);
+    renderPool();renderPlayers();
+    return;
+  }
+  if(action==='camera'){
+    fileInput.removeAttribute('capture');
+    fileInput.setAttribute('capture','environment');
+    fileInput.value='';
+    fileInput.click();
+    return;
+  }
+  if(action==='gallery'){
+    fileInput.removeAttribute('capture');
+    fileInput.value='';
+    fileInput.click();
+  }
+});
+
+fileInput.addEventListener('change',e=>{
+  const file=e.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    openAdjustModal(state.menuCharId,ev.target.result);
+  };
+  reader.readAsDataURL(file);
+});
+
+/* ====== adjust modal ====== */
+let adjustState={id:null,dataUrl:null,zoom:1,px:50,py:50};
+let dragState={active:false,startX:0,startY:0,startPx:50,startPy:50};
+
+function openAdjustModal(id,dataUrl){
+  state.adjustCharId=id;
+  adjustState.id=id;
+  adjustState.dataUrl=dataUrl;
+  adjustState.zoom=1;
+  adjustState.px=50;
+  adjustState.py=50;
+  zoomSlider.value=1;
+  zoomLabel.textContent='1x';
+  previewImg.style.backgroundImage=`url('${dataUrl}')`;
+  previewImg.style.backgroundSize='cover';
+  previewImg.style.backgroundPosition='50% 50%';
+  overlay.classList.add('show');
+  adjustModal.classList.add('show');
+}
+
+function closeAdjustModal(save){
+  if(save){
+    setCustom(adjustState.id,{
+      dataUrl:adjustState.dataUrl,
+      zoom:adjustState.zoom,
+      px:adjustState.px,
+      py:adjustState.py,
+    });
+    renderPool();renderPlayers();
+  }
+  overlay.classList.remove('show');
+  adjustModal.classList.remove('show');
+  previewImg.style.backgroundImage='';
+  state.adjustCharId=null;
+}
+
+zoomSlider.addEventListener('input',()=>{
+  const z=parseFloat(zoomSlider.value);
+  zoomLabel.textContent=z.toFixed(1)+'x';
+  adjustState.zoom=z;
+  previewImg.style.backgroundSize=(z*100)+'% auto';
+});
+
+previewImg.addEventListener('mousedown',e=>{
+  dragState.active=true;
+  dragState.startX=e.clientX;
+  dragState.startY=e.clientY;
+  dragState.startPx=adjustState.px;
+  dragState.startPy=adjustState.py;
+  previewImg.classList.add('dragging');
+});
+document.addEventListener('mousemove',e=>{
+  if(!dragState.active) return;
+  const dx=e.clientX-dragState.startX;
+  const dy=e.clientY-dragState.startY;
+  const z=adjustState.zoom;
+  const moveX=(dx/(200*z))*100;
+  const moveY=(dy/(200*z))*100;
+  let newPx=Math.max(0,Math.min(100,dragState.startPx+moveX));
+  let newPy=Math.max(0,Math.min(100,dragState.startPy+moveY));
+  adjustState.px=newPx;
+  adjustState.py=newPy;
+  previewImg.style.backgroundPosition=newPx+'% '+newPy+'%';
+});
+document.addEventListener('mouseup',()=>{
+  if(!dragState.active) return;
+  dragState.active=false;
+  previewImg.classList.remove('dragging');
+});
+
+previewImg.addEventListener('touchstart',e=>{
+  const t=e.touches[0];
+  dragState.active=true;
+  dragState.startX=t.clientX;
+  dragState.startY=t.clientY;
+  dragState.startPx=adjustState.px;
+  dragState.startPy=adjustState.py;
+},{passive:true});
+previewImg.addEventListener('touchmove',e=>{
+  if(!dragState.active||e.touches.length!==1) return;
+  const t=e.touches[0];
+  const dx=t.clientX-dragState.startX;
+  const dy=t.clientY-dragState.startY;
+  const z=adjustState.zoom;
+  const moveX=(dx/(200*z))*100;
+  const moveY=(dy/(200*z))*100;
+  let newPx=Math.max(0,Math.min(100,dragState.startPx+moveX));
+  let newPy=Math.max(0,Math.min(100,dragState.startPy+moveY));
+  adjustState.px=newPx;
+  adjustState.py=newPy;
+  previewImg.style.backgroundPosition=newPx+'% '+newPy+'%';
+},{passive:true});
+previewImg.addEventListener('touchend',()=>{
+  dragState.active=false;
+});
+
+document.getElementById('adjust-cancel').addEventListener('click',()=>closeAdjustModal(false));
+document.getElementById('adjust-confirm').addEventListener('click',()=>closeAdjustModal(true));
+document.getElementById('modal-bg-close').addEventListener('click',()=>closeAdjustModal(false));
+
+/* ====== init ====== */
 promptEl.textContent='👤 第1人 - 選擇你的戰士 ↑';
 renderPool();renderPlayers();updateDB();
 </script>
