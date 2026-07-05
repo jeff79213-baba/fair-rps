@@ -1051,10 +1051,16 @@ overlay.addEventListener('click',()=>{
   closeSettings();
   closeAdjustModal(false);
 });
+overlay.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  closeSettings();
+  closeAdjustModal(false);
+},{passive:false});
 camPick.addEventListener('change',handleFilePick);
 galPick.addEventListener('change',handleFilePick);
 
 document.getElementById('settings-close').addEventListener('click',closeSettings);
+document.getElementById('settings-close').addEventListener('touchstart',e=>{e.preventDefault();closeSettings()},{passive:false});
 document.getElementById('settings-reset').addEventListener('click',()=>{
   if(settingsCharId==null) return;
   removeCustom(settingsCharId);
@@ -1063,6 +1069,15 @@ document.getElementById('settings-reset').addEventListener('click',()=>{
   settingsCharId=null;
   renderPool();renderPlayers();
 });
+document.getElementById('settings-reset').addEventListener('touchstart',e=>{
+  e.preventDefault();
+  if(settingsCharId==null) return;
+  removeCustom(settingsCharId);
+  renderSettingsGrid();
+  settingsActions.classList.remove('show');
+  settingsCharId=null;
+  renderPool();renderPlayers();
+},{passive:false});
 
 /* ====== adjust modal ====== */
 let adjustState={id:null,dataUrl:null,zoom:1,px:50,py:50};
@@ -1161,7 +1176,9 @@ previewImg.addEventListener('touchend',()=>{
 });
 
 document.getElementById('adjust-cancel').addEventListener('click',()=>closeAdjustModal(false));
+document.getElementById('adjust-cancel').addEventListener('touchstart',e=>{e.preventDefault();closeAdjustModal(false)},{passive:false});
 document.getElementById('adjust-confirm').addEventListener('click',()=>closeAdjustModal(true));
+document.getElementById('adjust-confirm').addEventListener('touchstart',e=>{e.preventDefault();closeAdjustModal(true)},{passive:false});
 document.getElementById('modal-bg-close').addEventListener('click',()=>closeAdjustModal(false));
 
 /* ====== init ====== */
