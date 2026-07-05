@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>公平猜拳 - Dragon Ball</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:linear-gradient(180deg,#0D0D1A 0%,#1A1A2E 50%,#0D0D1A 100%);
+  min-height:100vh;font-family:'Segoe UI',system-ui,sans-serif;
+  color:#F5F5F5;display:flex;justify-content:center;padding:8px;
+  overflow-x:hidden;
+}
+#app{width:100%;max-width:520px;display:flex;flex-direction:column;align-items:center;gap:10px;padding-bottom:30px}
+
+/* ===== stars bg ===== */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%,#FFF 100%,transparent),
+    radial-gradient(1px 1px at 30% 60%,#FFF 100%,transparent),
+    radial-gradient(1.5px 1.5px at 50% 10%,#FFF 100%,transparent),
+    radial-gradient(1px 1px at 70% 40%,#FFF 100%,transparent),
+    radial-gradient(1px 1px at 90% 80%,#FFF 100%,transparent),
+    radial-gradient(1.5px 1.5px at 15% 85%,#FFF 100%,transparent),
+    radial-gradient(1px 1px at 85% 15%,#FFF 100%,transparent),
+    radial-gradient(1px 1px at 45% 45%,#FFF 100%,transparent),
+    radial-gradient(1.5px 1.5px at 25% 35%,#FFF 100%,transparent),
+    radial-gradient(1px 1px at 75% 75%,#FFF 100%,transparent),
+    radial-gradient(1px 1px at 5% 50%,#FFF 100%,transparent),
+    radial-gradient(1px 1px at 95% 50%,#FFF 100%,transparent),
+    radial-gradient(1.5px 1.5px at 40% 75%,#FFF 100%,transparent);
+  pointer-events:none;z-index:0;
+}
+
+/* ===== header ===== */
+header{
+  text-align:center;position:relative;z-index:1;width:100%;
+  padding:12px 0 6px;
+}
+h1{
+  font-size:2rem;font-weight:900;
+  color:#FFD700;text-shadow:
+    0 0 10px rgba(255,107,0,.6),
+    0 2px 0 #CC5500,
+    0 -1px 0 #CC5500,
+    2px 0 0 #CC5500,
+    -2px 0 0 #CC5500;
+  letter-spacing:4px;position:relative;
+  display:inline-block;
+}
+h1::before{content:'⚡';margin-right:6px}
+h1::after{content:'⚡';margin-left:6px}
+.subtitle{
+  font-size:.7rem;color:#FF8A5C;letter-spacing:6px;
+  text-transform:uppercase;margin-top:-4px;opacity:.8;
+}
+
+/* ===== section title ===== */
+.sec-title{
+  font-size:.75rem;color:#FFD700;letter-spacing:3px;
+  text-align:center;padding:4px 0;opacity:.6;
+  width:100%;
+}
+
+/* ===== character pool ===== */
+#char-pool{
+  display:flex;gap:6px;padding:8px 4px;
+  overflow-x:auto;overflow-y:hidden;
+  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+  width:100%;position:relative;z-index:1;
+  scrollbar-width:none;
+}
+#char-pool::-webkit-scrollbar{display:none}
+
+.char{
+  scroll-snap-align:start;flex-shrink:0;
+  width:68px;height:68px;border-radius:50%;
+  position:relative;cursor:pointer;
+  transition:transform .2s,filter .2s;
+  display:flex;align-items:center;justify-content:center;
+}
+.char:active{transform:scale(.92)}
+.char.picked{filter:brightness(.35);cursor:not-allowed;transform:scale(.9)}
+.char.picked::after{
+  content:'✓';position:absolute;bottom:-2px;right:-2px;
+  width:20px;height:20px;background:#2ECC71;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:bold;color:#fff;
+  border:2px solid #1A1A2E;z-index:5;
+}
+.char-inner{
+  width:62px;height:62px;border-radius:50%;position:relative;
+  overflow:hidden;border:3px solid rgba(255,255,255,.25);
+  transition:border-color .2s;
+}
+.char:not(.picked):hover .char-inner{border-color:rgba(255,215,0,.6)}
+
+/* ---- character unique styles ---- */
+.char-inner{display:flex;align-items:center;justify-content:center}
+.char-face{
+  width:26px;height:26px;position:relative;z-index:2;
+}
+.eyes{
+  display:flex;gap:5px;justify-content:center;
+}
+.eye{
+  width:5px;height:6px;background:#222;border-radius:50%;
+  position:relative;
+}
+.eye::after{
+  content:'';position:absolute;top:1px;right:0;
+  width:2px;height:2px;background:#fff;border-radius:50%;
+}
+
+/* c0 Goku - orange + black spikes */
+.c0 .char-inner{background:linear-gradient(135deg,#FF6B00,#E65C00)}
+.c0 .hair-spikes{
+  position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+  width:44px;height:18px;z-index:3;
+}
+.c0 .hair-spikes::before{
+  content:'';position:absolute;
+  width:0;height:0;
+  border-left:5px solid transparent;
+  border-right:5px solid transparent;
+  border-bottom:14px solid #1a1a1a;
+  left:2px;top:0;
+  box-shadow:
+    10px 4px 0 -2px #1a1a1a,
+    20px 0px 0 -1px #1a1a1a,
+    30px 4px 0 -2px #1a1a1a;
+}
+.c0 .face-color{background:#FDBF8A;border-radius:50%;width:28px;height:28px;position:absolute;z-index:1}
+
+/* c1 Vegeta - blue + M hair */
+.c1 .char-inner{background:linear-gradient(135deg,#1A3A6C,#0F2950)}
+.c1 .hair-m{
+  position:absolute;top:-4px;left:50%;transform:translateX(-50%);
+  width:48px;height:22px;z-index:3;
+}
+.c1 .hair-m::before{
+  content:'';position:absolute;
+  width:0;height:0;
+  border-left:10px solid transparent;
+  border-right:10px solid transparent;
+  border-bottom:18px solid #1a1a1a;
+  left:50%;transform:translateX(-50%);
+}
+.c1 .hair-m::after{
+  content:'';position:absolute;
+  width:0;height:0;
+  border-left:8px solid transparent;
+  border-bottom:14px solid #1a1a1a;
+  left:2px;top:4px;
+  box-shadow:34px 0 0 0 #1a1a1a;
+}
+.c1 .face-color{background:#F0C8A0;border-radius:50%;width:28px;height:28px;position:absolute;z-index:1}
+
+/* c2 Gohan - purple + short spikes */
+.c2 .char-inner{background:linear-gradient(135deg,#7D3C98,#5B2C6F)}
+.c2 .hair-short{
+  position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+  width:40px;height:16px;z-index:3;
+}
+.c2 .hair-short::before{
+  content:'';position:absolute;
+  width:0;height:0;
+  border-left:4px solid transparent;
+  border-right:4px solid transparent;
+  border-bottom:12px solid #1a1a1a;
+  left:4px;
+  box-shadow:
+    8px 3px 0 -1px #1a1a1a,
+    16px 0 0 -1px #1a1a1a,
+    24px 3px 0 -1px #1a1a1a;
+}
+.c2 .face-color{background:#FDBF8A;border-radius:50%;width:28px;height:28px;position:absolute;z-index:1}
+.c2 .hair-short-long{
+  position:absolute;top:-2px;left:-4px;width:14px;height:20px;
+  background:#1a1a1a;border-radius:4px 0 10px 6px;z-index:3;
+  box-shadow:42px 0 0 0 #1a1a1a;
+}
+
+/* c3 Piccolo - green + white turban */
+.c3 .char-inner{background:linear-gradient(135deg,#27AE60,#1E8449)}
+.c3 .turban{
+  position:absolute;top:6px;left:50%;transform:translateX(-50%);
+  width:54px;height:14px;background:#E8E8E8;border-radius:4px;z-index:3;
+}
+.c3 .turban::after{
+  content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);
+  width:10px;height:10px;background:#E8E8E8;border-radius:0 0 50% 50%;
+}
+.c3 .face-color{background:#90C695;border-radius:50%;width:26px;height:26px;position:absolute;z-index:1}
+
+/* c4 Frieza - white + purple horns */
+.c4 .char-inner{background:linear-gradient(135deg,#E8E0E0,#D0C8C8)}
+.c4 .horns{
+  position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+  width:40px;height:20px;z-index:3;
+}
+.c4 .horns::before{
+  content:'';position:absolute;
+  width:0;height:0;
+  border-left:5px solid transparent;
+  border-right:7px solid transparent;
+  border-bottom:18px solid #8E44AD;
+  left:0;
+}
+.c4 .horns::after{
+  content:'';position:absolute;right:0;
+  width:0;height:0;
+  border-left:7px solid transparent;
+  border-right:5px solid transparent;
+  border-bottom:18px solid #8E44AD;
+}
+.c4 .face-color{background:#E8C8C0;border-radius:50%;width:26px;height:26px;position:absolute;z-index:1}
+.c4 .purple-spot{
+  position:absolute;top:14px;left:6px;width:8px;height:8px;
+  background:#8E44AD;border-radius:50%;opacity:.4;z-index:2;
+  box-shadow:32px 4px 0 0 #8E44AD;
+}
+
+/* c5 Cell - dark teal + spots */
+.c5 .char-inner{background:linear-gradient(135deg,#0E6251,#0B5345)}
+.c5 .spots{
+  position:absolute;inset:0;z-index:2;
+  background:
+    radial-gradient(circle 4px at 15px 15px,#1a1a1a 100%,transparent),
+    radial-gradient(circle 3px at 40px 10px,#1a1a1a 100%,transparent),
+    radial-gradient(circle 4px at 25px 30px,#1a1a1a 100%,transparent),
+    radial-gradient(circle 3px at 48px 35px,#1a1a1a 100%,transparent),
+    radial-gradient(circle 4px at 10px 42px,#1a1a1a 100%,transparent),
+    radial-gradient(circle 3px at 38px 48px,#1a1a1a 100%,transparent);
+}
+.c5 .face-color{background:#A8D5A2;border-radius:50%;width:26px;height:26px;position:absolute;z-index:3}
+.c5 .eyes{z-index:4;position:relative}
+
+/* c6 Buu - pink + antenna */
+.c6 .char-inner{background:linear-gradient(135deg,#FF69B4,#E0559A)}
+.c6 .antenna{
+  position:absolute;top:-4px;left:50%;transform:translateX(-50%);
+  width:4px;height:14px;background:#E8D0A0;border-radius:2px;z-index:3;
+  border-top:4px solid #D4A060;border-radius:2px 2px 50% 50%;
+}
+.c6 .face-color{background:#FDE0D0;border-radius:50%;width:28px;height:28px;position:absolute;z-index:1}
+.c6 .eyes{z-index:2;position:relative}
+
+/* c7 Trunks - light blue + purple long hair */
+.c7 .char-inner{background:linear-gradient(135deg,#5DADE2,#3498DB)}
+.c7 .hair-long-l{
+  position:absolute;top:-4px;left:-8px;width:14px;height:42px;
+  background:linear-gradient(#6C3483,#4A235A);
+  border-radius:50% 10% 40% 20%;z-index:3;transform:rotate(-8deg);
+}
+.c7 .hair-long-r{
+  position:absolute;top:-4px;right:-8px;width:14px;height:42px;
+  background:linear-gradient(#6C3483,#4A235A);
+  border-radius:10% 50% 20% 40%;z-index:3;transform:rotate(8deg);
+}
+.c7 .hair-top{
+  position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+  width:30px;height:12px;background:#6C3483;border-radius:6px 6px 0 0;z-index:3;
+}
+.c7 .face-color{background:#FDBF8A;border-radius:50%;width:26px;height:26px;position:absolute;z-index:1}
+
+/* c8 Krillin - yellow + dots */
+.c8 .char-inner{background:linear-gradient(135deg,#F1C40F,#D4AC0D)}
+.c8 .bald-spots{
+  position:absolute;top:10px;left:50%;transform:translateX(-50%);
+  display:flex;gap:3px;z-index:3;
+}
+.c8 .bald-spots span{
+  display:block;width:5px;height:5px;
+  background:#A0522D;border-radius:50%;
+}
+.c8 .face-color{background:#FDBF8A;border-radius:50%;width:28px;height:28px;position:absolute;z-index:1}
+.c8 .eyes{z-index:2;position:relative}
+
+/* c9 Tien - red + 3 eyes */
+.c9 .char-inner{background:linear-gradient(135deg,#C0392B,#A93226)}
+.c9 .face-color{background:#F0C8A0;border-radius:50%;width:28px;height:28px;position:absolute;z-index:1}
+.c9 .eyes-three{
+  display:flex;gap:4px;justify-content:center;position:relative;z-index:2;
+}
+.c9 .eyes-three .eye3{
+  width:5px;height:6px;background:#222;border-radius:50%;position:relative;
+}
+.c9 .eyes-three .eye3::after{
+  content:'';position:absolute;top:1px;right:0;
+  width:2px;height:2px;background:#fff;border-radius:50%;
+}
+.c9 .hair-long{
+  position:absolute;top:-8px;left:-4px;width:16px;height:34px;
+  background:#1a1a1a;border-radius:50% 10% 30% 20%;z-index:3;
+  box-shadow:38px 0 0 0 #1a1a1a;
+}
+.c9 .hair-top-piece{
+  position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+  width:28px;height:10px;background:#1a1a1a;border-radius:4px 4px 0 0;z-index:3;
+}
+
+/* ===== selected indicator ===== */
+.char .sel-indicator{
+  display:none;position:absolute;bottom:-3px;left:50%;
+  transform:translateX(-50%);font-size:10px;color:#FFD700;
+}
+.char.current .sel-indicator{display:block}
+
+/* ===== players area ===== */
+#players-area{
+  display:flex;flex-wrap:wrap;gap:10px;justify-content:center;
+  width:100%;min-height:100px;padding:10px;
+  background:rgba(255,255,255,.04);
+  border:1px dashed rgba(255,215,0,.15);
+  border-radius:16px;position:relative;z-index:1;
+}
+#players-area.empty{
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,.25);font-size:.85rem;
+}
+.player-card{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  transition:all .4s cubic-bezier(.34,1.56,.64,1);
+}
+.player-card.entering{animation:cardIn .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes cardIn{
+  0%{opacity:0;transform:translateY(30px) scale(.6)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+.player-card .mini-avatar{
+  width:60px;height:60px;border-radius:50%;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;border:2px solid rgba(255,255,255,.3);
+  transition:border-color .3s,box-shadow .3s;
+}
+.mini-avatar .char-inner{width:56px;height:56px}
+.player-card .status{
+  font-size:1.1rem;height:22px;display:flex;align-items:center;justify-content:center;
+}
+.player-card .gesture-display{
+  font-size:1.6rem;height:32px;display:flex;align-items:center;justify-content:center;
+}
+
+/* locked state */
+.player-card.locked .mini-avatar{border-color:#FF8A5C}
+.player-card.locked .status{color:#FF8A5C;font-weight:bold}
+
+/* revealed state */
+.player-card.revealed .mini-avatar{}
+.player-card.winner .mini-avatar{
+  border-color:#FFD700;box-shadow:0 0 20px rgba(255,215,0,.5),0 0 40px rgba(255,107,0,.3);
+  animation:goldPulse 1.2s ease-in-out infinite;
+}
+@keyframes goldPulse{
+  0%,100%{box-shadow:0 0 15px rgba(255,215,0,.4),0 0 30px rgba(255,107,0,.2)}
+  50%{box-shadow:0 0 25px rgba(255,215,0,.7),0 0 50px rgba(255,107,0,.4)}
+}
+.player-card.winner .status{color:#FFD700;font-weight:bold;font-size:1.2rem}
+.player-card.loser .status{color:#888;font-size:.8rem}
+.player-card.tie .status{color:#85C1E9;font-size:.85rem}
+
+/* lightning FX for winner */
+.player-card.winner .mini-avatar::before{
+  content:'⚡';position:absolute;top:-10px;right:-8px;font-size:16px;
+  animation:lightning 1.5s ease-in-out infinite;z-index:5;
+}
+.player-card.winner .mini-avatar::after{
+  content:'⚡';position:absolute;bottom:-10px;left:-8px;font-size:16px;
+  animation:lightning 1.5s ease-in-out infinite .3s;z-index:5;
+}
+@keyframes lightning{
+  0%,100%{opacity:1;transform:scale(1)}
+  30%{opacity:1;transform:scale(1.3)}
+  60%{opacity:.3;transform:scale(.8)}
+}
+
+/* crown emoji for winner */
+.player-card.winner .gesture-display::after{
+  content:' 👑';font-size:.8rem;
+}
+
+/* ===== gesture buttons ===== */
+#gesture-area{
+  width:100%;display:flex;flex-direction:column;align-items:center;
+  gap:8px;position:relative;z-index:1;
+  transition:all .3s;
+}
+#gesture-area.hidden{display:none}
+#gesture-btns{
+  display:flex;gap:16px;justify-content:center;
+}
+.gesture-btn{
+  width:76px;height:76px;border-radius:50%;border:3px solid rgba(255,255,255,.25);
+  background:rgba(255,255,255,.08);font-size:2rem;cursor:pointer;
+  transition:all .2s;display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
+}
+.gesture-btn:active{transform:scale(.88)}
+.gesture-btn:hover{border-color:#FFD700;background:rgba(255,215,0,.12)}
+.gesture-btn .g-label{
+  display:block;font-size:.6rem;color:rgba(255,255,255,.5);
+  position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);
+  white-space:nowrap;
+}
+.gesture-btn{padding:0;position:relative}
+
+/* ===== prompt ===== */
+#prompt{
+  font-size:.9rem;color:#FFD700;text-align:center;
+  padding:4px 0;min-height:24px;position:relative;z-index:1;
+}
+
+/* ===== dragon balls ===== */
+#db-progress{
+  display:flex;gap:4px;align-items:center;
+  position:relative;z-index:1;padding:4px 0;
+}
+.db{
+  width:14px;height:14px;border-radius:50%;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.15);
+  transition:all .4s;
+  position:relative;
+}
+.db.on{
+  background:radial-gradient(circle at 35% 35%,#FFD700,#FF6B00);
+  border-color:#FFD700;
+  box-shadow:0 0 8px rgba(255,107,0,.5);
+}
+.db.on::after{
+  content:'★';position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:7px;color:#FFF;text-shadow:0 0 3px rgba(255,255,255,.5);
+}
+.db-label{
+  font-size:.6rem;color:rgba(255,255,255,.3);margin-left:6px;
+}
+
+/* ===== reveal button ===== */
+#reveal-btn{
+  padding:12px 36px;border:none;border-radius:50px;
+  background:linear-gradient(135deg,#FF6B00,#FF4500);
+  color:#FFF;font-size:1.1rem;font-weight:bold;
+  cursor:pointer;transition:all .2s;
+  box-shadow:0 4px 20px rgba(255,107,0,.4);
+  position:relative;z-index:1;
+  letter-spacing:2px;
+}
+#reveal-btn:active{transform:scale(.94)}
+#reveal-btn:hover{box-shadow:0 4px 30px rgba(255,107,0,.6)}
+#reveal-btn.hidden{display:none}
+#reveal-btn:disabled{
+  opacity:.4;cursor:not-allowed;transform:none;
+  box-shadow:none;
+}
+
+/* ===== replay btn ===== */
+#replay-btn{
+  padding:10px 28px;border:2px solid rgba(255,215,0,.4);
+  border-radius:50px;
+  background:transparent;color:#FFD700;font-size:.95rem;
+  cursor:pointer;transition:all .2s;
+  position:relative;z-index:1;
+}
+#replay-btn:active{transform:scale(.94)}
+#replay-btn:hover{background:rgba(255,215,0,.1);border-color:#FFD700}
+#replay-btn.hidden{display:none}
+
+/* ===== result msg ===== */
+#result-msg{
+  font-size:1rem;text-align:center;padding:4px 0;
+  min-height:30px;position:relative;z-index:1;
+}
+
+/* ===== floating stars ===== */
+.floating-star{
+  position:fixed;font-size:18px;pointer-events:none;
+  opacity:0;z-index:10;
+  animation:starFloat 2s ease-out forwards;
+}
+@keyframes starFloat{
+  0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}
+  100%{opacity:0;transform:translateY(-80px) rotate(360deg) scale(.3)}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<header>
+  <h1>公平猜拳</h1>
+  <div class="subtitle">DRAGON BALL EDITION</div>
+</header>
+
+<div id="prompt"></div>
+
+<div id="char-pool"></div>
+
+<div class="sec-title">── 參賽戰士 ──</div>
+<div id="players-area" class="empty">
+  <span>↑ 選擇你的戰士</span>
+</div>
+
+<div id="gesture-area" class="hidden">
+  <div style="font-size:.75rem;color:rgba(255,255,255,.5)">選擇你的招式</div>
+  <div id="gesture-btns">
+    <button class="gesture-btn" data-g="rock">✊</button>
+    <button class="gesture-btn" data-g="paper">✋</button>
+    <button class="gesture-btn" data-g="scissors">✌️</button>
+  </div>
+</div>
+
+<div id="db-progress"></div>
+
+<button id="reveal-btn" class="hidden">⚡ 決勝負 ⚡</button>
+<div id="result-msg"></div>
+<button id="replay-btn" class="hidden">もう一回！再戰 🔥</button>
+
+</div>
+
+<script>
+const CHAR_DATA = [
+  {id:0,bg:'#FF6B00',cls:'c0'},
+  {id:1,bg:'#1A3A6C',cls:'c1'},
+  {id:2,bg:'#7D3C98',cls:'c2'},
+  {id:3,bg:'#27AE60',cls:'c3'},
+  {id:4,bg:'#E8E0E0',cls:'c4'},
+  {id:5,bg:'#0E6251',cls:'c5'},
+  {id:6,bg:'#FF69B4',cls:'c6'},
+  {id:7,bg:'#5DADE2',cls:'c7'},
+  {id:8,bg:'#F1C40F',cls:'c8'},
+  {id:9,bg:'#C0392B',cls:'c9'},
+];
+
+const GESTURES = ['rock','paper','scissors'];
+const G_EMOJI = {rock:'✊',paper:'✋',scissors:'✌️'};
+const G_NAME = {rock:'石頭',paper:'布',scissors:'剪刀'};
+const G_BEATS = {rock:'scissors',scissors:'paper',paper:'rock'};
+
+let state = {
+  phase: 'select', // select | gesture | reveal
+  curPlayer: 0,
+  players: [],     // {charId, gesture}
+  availChars: CHAR_DATA.map(c=>c.id),
+  selCharId: null,
+};
+
+const poolEl = document.getElementById('char-pool');
+const playersEl = document.getElementById('players-area');
+const gestureArea = document.getElementById('gesture-area');
+const gestureBtns = document.getElementById('gesture-btns');
+const promptEl = document.getElementById('prompt');
+const dbEl = document.getElementById('db-progress');
+const revealBtn = document.getElementById('reveal-btn');
+const resultMsg = document.getElementById('result-msg');
+const replayBtn = document.getElementById('replay-btn');
+
+function charInnerHTML(cls){
+  const face = `<div class="face-color"></div>`;
+  if(cls==='c9'){
+    return face+`<div class="char-face"><div class="eyes-three"><div class="eye3"></div><div class="eye3"></div><div class="eye3"></div></div></div>`+
+      `<div class="hair-long"></div><div class="hair-top-piece"></div>`;
+  }
+  const eyes = `<div class="char-face"><div class="eyes"><div class="eye"></div><div class="eye"></div></div></div>`;
+  const features = {
+    c0:`<div class="hair-spikes"></div>`,
+    c1:`<div class="hair-m"></div>`,
+    c2:`<div class="hair-short"></div><div class="hair-short-long"></div>`,
+    c3:`<div class="turban"></div>`,
+    c4:`<div class="horns"></div><div class="purple-spot"></div>`,
+    c5:`<div class="spots"></div>`,
+    c6:`<div class="antenna"></div>`,
+    c7:`<div class="hair-long-l"></div><div class="hair-long-r"></div><div class="hair-top"></div>`,
+    c8:`<div class="bald-spots"><span></span><span></span><span></span></div>`,
+  };
+  return (features[cls]||'')+face+eyes;
+}
+
+function renderPool(){
+  poolEl.innerHTML = '';
+  CHAR_DATA.forEach(c=>{
+    const div = document.createElement('div');
+    div.className = `char ${c.cls}`;
+    div.dataset.id = c.id;
+    if(!state.availChars.includes(c.id)) div.classList.add('picked');
+    div.innerHTML = `<div class="char-inner">${charInnerHTML(c.cls)}</div>`;
+    div.addEventListener('click',()=>onCharClick(c.id));
+    poolEl.appendChild(div);
+  });
+}
+
+function renderPlayers(){
+  playersEl.innerHTML = '';
+  playersEl.classList.remove('empty');
+  if(state.players.length===0){
+    playersEl.classList.add('empty');
+    playersEl.innerHTML = '<span>↑ 選擇你的戰士</span>';
+    return;
+  }
+  state.players.forEach((p,i)=>{
+    const cd = CHAR_DATA.find(c=>c.id===p.charId);
+    const card = document.createElement('div');
+    card.className = 'player-card entering';
+    card.dataset.idx = i;
+
+    const av = document.createElement('div');
+    av.className = `mini-avatar ${cd.cls}`;
+    av.innerHTML = `<div class="char-inner">${charInnerHTML(cd.cls)}</div>`;
+
+    const gd = document.createElement('div');
+    gd.className = 'gesture-display';
+
+    const st = document.createElement('div');
+    st.className = 'status';
+
+    if(state.phase==='reveal'){
+      gd.textContent = G_EMOJI[p.gesture];
+      card.classList.add('revealed');
+    } else if(p.gesture){
+      gd.textContent = '★';
+      st.textContent = '鎖定';
+      card.classList.add('locked');
+    } else {
+      gd.textContent = '❓';
+      st.textContent = '待選';
+    }
+    card.appendChild(av);
+    card.appendChild(gd);
+    card.appendChild(st);
+    playersEl.appendChild(card);
+  });
+
+  if(state.phase==='reveal'){
+    applyResults();
+  }
+}
+
+function applyResults(){
+  const result = determineWinner();
+  const cards = playersEl.querySelectorAll('.player-card');
+  cards.forEach((card,i)=>{
+    const p = state.players[i];
+    if(result.type==='winners'){
+      if(result.winnerIds.includes(p.charId)){
+        card.classList.add('winner');
+        card.querySelector('.status').textContent = '👑 WINNER';
+      } else {
+        card.classList.add('loser');
+        card.querySelector('.status').textContent = '😵 敗北';
+      }
+    } else {
+      card.classList.add('tie');
+      card.querySelector('.status').textContent = result.msg || '🤝 平手';
+    }
+  });
+}
+
+function determineWinner(){
+  const n = state.players.length;
+  if(n<2) return {type:'none'};
+
+  const allG = state.players.map(p=>p.gesture);
+  const uniqueG = [...new Set(allG)];
+
+  if(uniqueG.length===1) return {type:'tie',msg:'🤝 你們是同一種賽亞人嗎？'};
+  if(uniqueG.length===3) return {type:'tie',msg:'🤝 三種拳都出現！勢均力敵！'};
+
+  let winG;
+  if(uniqueG.includes('rock') && uniqueG.includes('scissors')) winG='rock';
+  else if(uniqueG.includes('scissors') && uniqueG.includes('paper')) winG='scissors';
+  else if(uniqueG.includes('paper') && uniqueG.includes('rock')) winG='paper';
+  else return {type:'tie',msg:'🤝 平手！'};
+
+  const wIds = state.players.filter(p=>p.gesture===winG).map(p=>p.charId);
+
+  if(wIds.length===1){
+    const cd = CHAR_DATA.find(c=>c.id===wIds[0]);
+    return {type:'winners',winnerIds:wIds,msg:`👑 戰士 No.${wIds[0]+1} 是超級賽亞人！戰鬥力 ∞`};
+  }
+  return {type:'winners',winnerIds:wIds,msg:`👑 ${wIds.length}位戰士是超級賽亞人！戰鬥力 ∞`};
+}
+
+function onCharClick(id){
+  if(state.phase!=='select') return;
+  if(!state.availChars.includes(id)) return;
+
+  state.selCharId = id;
+  state.phase = 'gesture';
+  state.availChars = state.availChars.filter(c=>c!==id);
+
+  renderPool();
+  renderPlayers();
+  gestureArea.classList.remove('hidden');
+  promptEl.textContent = `👤 第${state.curPlayer+1}人 - 選擇你的招式 ↓`;
+  updateDB();
+}
+
+gestureBtns.addEventListener('click',e=>{
+  const btn = e.target.closest('.gesture-btn');
+  if(!btn) return;
+  if(state.phase!=='gesture') return;
+  const g = btn.dataset.g;
+  if(!g) return;
+
+  state.players.push({charId:state.selCharId,gesture:g});
+  state.selCharId = null;
+  state.curPlayer++;
+  state.phase = 'select';
+  gestureArea.classList.add('hidden');
+
+  renderPool();
+  renderPlayers();
+  updateDB();
+
+  if(state.players.length>=2){
+    revealBtn.classList.remove('hidden');
+    revealBtn.disabled = false;
+  }
+  if(state.availChars.length===0){
+    promptEl.textContent = '⚡ 所有戰士已就位！按下決勝負！';
+  } else {
+    promptEl.textContent = `👤 第${state.curPlayer+1}人 - 選擇你的戰士 ↑`;
+  }
+});
+
+revealBtn.addEventListener('click',()=>{
+  if(state.phase==='reveal') return;
+  if(state.players.length<2) return;
+  state.phase = 'reveal';
+  revealBtn.classList.add('hidden');
+  gestureArea.classList.add('hidden');
+
+  renderPlayers();
+
+  const result = determineWinner();
+  resultMsg.textContent = result.msg || '';
+
+  // show replay
+  replayBtn.classList.remove('hidden');
+  promptEl.textContent = '⚡ 勝負揭曉！⚡';
+  spawnStars(5);
+});
+
+replayBtn.addEventListener('click',()=>{
+  state.phase = 'select';
+  state.curPlayer = 0;
+  state.players = [];
+  state.availChars = CHAR_DATA.map(c=>c.id);
+  state.selCharId = null;
+
+  revealBtn.classList.add('hidden');
+  replayBtn.classList.add('hidden');
+  gestureArea.classList.add('hidden');
+  resultMsg.textContent = '';
+  promptEl.textContent = '👤 第1人 - 選擇你的戰士 ↑';
+
+  renderPool();
+  renderPlayers();
+  updateDB();
+});
+
+function updateDB(){
+  dbEl.innerHTML = '';
+  const n = state.players.length;
+  const max = Math.min(7,CHAR_DATA.length);
+  for(let i=0;i<max;i++){
+    const db = document.createElement('div');
+    db.className = 'db'+(i<n?' on':'');
+    dbEl.appendChild(db);
+  }
+  const lbl = document.createElement('span');
+  lbl.className = 'db-label';
+  lbl.textContent = `${n}/${CHAR_DATA.length} 參戰`;
+  dbEl.appendChild(lbl);
+}
+
+function spawnStars(count){
+  for(let i=0;i<count;i++){
+    setTimeout(()=>{
+      const star = document.createElement('div');
+      star.className = 'floating-star';
+      star.textContent = ['★','⚡','✨','🔥'][Math.floor(Math.random()*4)];
+      star.style.left = (10+Math.random()*80)+'%';
+      star.style.top = (30+Math.random()*40)+'%';
+      star.style.fontSize = (14+Math.random()*14)+'px';
+      document.body.appendChild(star);
+      setTimeout(()=>star.remove(),2500);
+    },i*200);
+  }
+}
+
+// init
+promptEl.textContent = '👤 第1人 - 選擇你的戰士 ↑';
+renderPool();
+renderPlayers();
+updateDB();
+</script>
+</body>
+</html>
