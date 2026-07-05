@@ -811,7 +811,7 @@ function charInnerHTML(cls,id){
     const z=c.zoom||1;
     const px=c.px||50;
     const py=c.py||50;
-    return `<div class="custom-face" style="background:url('${c.dataUrl}') ${px}% ${py}%/ ${z*100}% auto no-repeat"></div>`;
+    return `<div class="custom-face" style="background-image:url('${c.dataUrl}');background-position:${px}% ${py}%;background-size:${z*100}% auto;background-repeat:no-repeat"></div>`;
   }
   return CHAR_HTML[cls]||'';
 }
