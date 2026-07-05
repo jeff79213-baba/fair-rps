@@ -993,33 +993,30 @@ charMenu.addEventListener('click',e=>{
   if(!item) return;
   const action=item.dataset.action;
   const id=state.menuCharId;
-  closeCharMenu();
-  if(action==='cancel') return;
+  if(action==='cancel'){closeCharMenu();return}
   if(action==='reset'){
+    closeCharMenu();
     removeCustom(id);
     renderPool();renderPlayers();
     return;
   }
-  if(action==='camera'){
+  if(action==='camera'||action==='gallery'){
+    state.pendingCharId=id;
+    closeCharMenu();
     fileInput.removeAttribute('capture');
-    fileInput.setAttribute('capture','environment');
+    if(action==='camera') fileInput.setAttribute('capture','environment');
     fileInput.value='';
-    fileInput.click();
-    return;
-  }
-  if(action==='gallery'){
-    fileInput.removeAttribute('capture');
-    fileInput.value='';
-    fileInput.click();
+    setTimeout(()=>fileInput.click(),100);
   }
 });
 
 fileInput.addEventListener('change',e=>{
   const file=e.target.files[0];
-  if(!file) return;
+  if(!file||state.pendingCharId==null) return;
   const reader=new FileReader();
   reader.onload=ev=>{
-    openAdjustModal(state.menuCharId,ev.target.result);
+    openAdjustModal(state.pendingCharId,ev.target.result);
+    state.pendingCharId=null;
   };
   reader.readAsDataURL(file);
 });
