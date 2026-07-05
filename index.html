@@ -558,11 +558,7 @@ h1::after{content:'⚡';margin-left:6px}
   user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
 }
 #char-menu .menu-cancel:active{background:rgba(255,255,255,.1)}
-.menu-file-item{position:relative;overflow:hidden;-webkit-tap-highlight-color:transparent}
-.file-overlay{
-  position:absolute;inset:-4px;opacity:0;font-size:0;
-  cursor:pointer;z-index:2;width:calc(100% + 8px);height:calc(100% + 8px);
-}
+/* file inputs at root level */
 
 /* ===== image adjust modal ===== */
 #adjust-modal{
@@ -663,17 +659,18 @@ h1::after{content:'⚡';margin-left:6px}
 
 <div class="overlay" id="overlay"></div>
 
+<input type="file" accept="image/*" capture="environment" id="fileCamera" style="display:none">
+<input type="file" accept="image/*" id="fileGallery" style="display:none">
+
 <div id="char-menu">
   <div class="menu-title">編輯角色頭像</div>
-  <div class="menu-item menu-file-item">
+  <div class="menu-item" id="btn-camera">
     <span class="icon">📷</span>
     <span class="label">拍照</span>
-    <input type="file" accept="image/*" capture="environment" class="file-overlay" id="camInput">
   </div>
-  <div class="menu-item menu-file-item">
+  <div class="menu-item" id="btn-gallery">
     <span class="icon">🖼️</span>
     <span class="label">從相簿選擇</span>
-    <input type="file" accept="image/*" class="file-overlay" id="galInput">
   </div>
   <div class="menu-item" data-action="reset">
     <span class="icon">🔄</span>
@@ -736,8 +733,8 @@ const replayBtn=document.getElementById('replay-btn');
 /* ---- image related ---- */
 const overlay=document.getElementById('overlay');
 const charMenu=document.getElementById('char-menu');
-const camInput=document.getElementById('camInput');
-const galInput=document.getElementById('galInput');
+const fileCamera=document.getElementById('fileCamera');
+const fileGallery=document.getElementById('fileGallery');
 const adjustModal=document.getElementById('adjust-modal');
 const previewImg=document.getElementById('preview-img');
 const zoomSlider=document.getElementById('zoom-slider');
@@ -996,24 +993,43 @@ function closeCharMenu(){
 
 overlay.addEventListener('click',closeCharMenu);
 
-function handleFileChange(e){
-  const file=e.target.files[0];
-  if(!file||state.menuCharId==null) return;
+function triggerFileInput(input){
   const id=state.menuCharId;
+  if(id==null) return;
+  state.pendingCharId=id;
+  input.value='';
+  input.click();
+}
+
+function onFileSelected(e,input){
+  const file=e.target.files[0];
+  if(!file||state.pendingCharId==null) return;
+  const id=state.pendingCharId;
+  state.pendingCharId=null;
   closeCharMenu();
-  e.target.value='';
+  input.value='';
   const reader=new FileReader();
-  reader.onload=ev=>{
-    openAdjustModal(id,ev.target.result);
-  };
+  reader.onload=ev=>{openAdjustModal(id,ev.target.result)};
   reader.readAsDataURL(file);
 }
 
-document.getElementById('camInput').addEventListener('change',handleFileChange);
-document.getElementById('galInput').addEventListener('change',handleFileChange);
+fileCamera.addEventListener('change',function(e){onFileSelected(e,fileCamera)});
+fileGallery.addEventListener('change',function(e){onFileSelected(e,fileGallery)});
+
+document.getElementById('btn-camera').addEventListener('touchstart',function(e){
+  triggerFileInput(fileCamera);e.preventDefault();
+},{passive:false});
+document.getElementById('btn-camera').addEventListener('click',function(){
+  triggerFileInput(fileCamera);
+});
+document.getElementById('btn-gallery').addEventListener('touchstart',function(e){
+  triggerFileInput(fileGallery);e.preventDefault();
+},{passive:false});
+document.getElementById('btn-gallery').addEventListener('click',function(){
+  triggerFileInput(fileGallery);
+});
 
 charMenu.addEventListener('click',e=>{
-  if(e.target.closest('.menu-file-item')) return;
   const item=e.target.closest('[data-action]');
   if(!item) return;
   const action=item.dataset.action;
