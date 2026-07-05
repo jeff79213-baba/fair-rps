@@ -546,6 +546,7 @@ h1::after{content:'⚡';margin-left:6px}
   display:flex;align-items:center;gap:12px;
   padding:14px 12px;border-radius:12px;cursor:pointer;
   transition:background .15s;font-size:1rem;
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
 }
 #char-menu .menu-item:active{background:rgba(255,255,255,.08)}
 #char-menu .menu-item .icon{font-size:1.3rem;width:32px;text-align:center}
@@ -554,6 +555,7 @@ h1::after{content:'⚡';margin-left:6px}
   margin-top:10px;padding:14px;border-radius:12px;
   background:rgba(255,255,255,.06);text-align:center;
   cursor:pointer;color:rgba(255,255,255,.5);transition:background .15s;
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
 }
 #char-menu .menu-cancel:active{background:rgba(255,255,255,.1)}
 
@@ -617,7 +619,10 @@ h1::after{content:'⚡';margin-left:6px}
 }
 #adjust-modal .modal-btns .btn-confirm:active{transform:scale(.96)}
 
-#file-input{display:none}
+.file-hidden{
+  position:fixed;opacity:0;pointer-events:none;
+  width:1px;height:1px;z-index:-1;
+}
 </style>
 </head>
 <body>
@@ -654,20 +659,20 @@ h1::after{content:'⚡';margin-left:6px}
 
 </div>
 
-<input type="file" id="file-input" accept="image/*">
-
 <div class="overlay" id="overlay"></div>
 
 <div id="char-menu">
   <div class="menu-title">編輯角色頭像</div>
-  <div class="menu-item" data-action="camera">
+  <label class="menu-item" id="menu-camera" for="cam-input">
     <span class="icon">📷</span>
     <span class="label">拍照</span>
-  </div>
-  <div class="menu-item" data-action="gallery">
+  </label>
+  <label class="menu-item" id="menu-gallery" for="gal-input">
     <span class="icon">🖼️</span>
     <span class="label">從相簿選擇</span>
-  </div>
+  </label>
+  <input type="file" accept="image/*" capture="environment" id="cam-input" class="file-hidden">
+  <input type="file" accept="image/*" id="gal-input" class="file-hidden">
   <div class="menu-item" data-action="reset">
     <span class="icon">🔄</span>
     <span class="label">回到預設</span>
@@ -727,9 +732,10 @@ const resultMsg=document.getElementById('result-msg');
 const replayBtn=document.getElementById('replay-btn');
 
 /* ---- image related ---- */
-const fileInput=document.getElementById('file-input');
 const overlay=document.getElementById('overlay');
 const charMenu=document.getElementById('char-menu');
+const camInput=document.getElementById('cam-input');
+const galInput=document.getElementById('gal-input');
 const adjustModal=document.getElementById('adjust-modal');
 const previewImg=document.getElementById('preview-img');
 const zoomSlider=document.getElementById('zoom-slider');
@@ -992,34 +998,31 @@ charMenu.addEventListener('click',e=>{
   const item=e.target.closest('[data-action]');
   if(!item) return;
   const action=item.dataset.action;
-  const id=state.menuCharId;
   if(action==='cancel'){closeCharMenu();return}
   if(action==='reset'){
     closeCharMenu();
-    removeCustom(id);
+    removeCustom(state.menuCharId);
     renderPool();renderPlayers();
     return;
   }
-  if(action==='camera'||action==='gallery'){
-    state.pendingCharId=id;
-    closeCharMenu();
-    fileInput.removeAttribute('capture');
-    if(action==='camera') fileInput.setAttribute('capture','environment');
-    fileInput.value='';
-    setTimeout(()=>fileInput.click(),100);
-  }
 });
 
-fileInput.addEventListener('change',e=>{
+function handleFilePick(e,src){
   const file=e.target.files[0];
-  if(!file||state.pendingCharId==null) return;
+  if(!file||state.menuCharId==null) return;
+  const id=state.menuCharId;
+  closeCharMenu();
+  e.target.value='';
   const reader=new FileReader();
   reader.onload=ev=>{
-    openAdjustModal(state.pendingCharId,ev.target.result);
-    state.pendingCharId=null;
+    openAdjustModal(id,ev.target.result);
   };
   reader.readAsDataURL(file);
-});
+}
+camInput.addEventListener('change',e=>handleFilePick(e,'camera'));
+galInput.addEventListener('change',e=>handleFilePick(e,'gallery'));
+document.getElementById('menu-camera').addEventListener('click',()=>{state.pendingCharId=state.menuCharId});
+document.getElementById('menu-gallery').addEventListener('click',()=>{state.pendingCharId=state.menuCharId});
 
 /* ====== adjust modal ====== */
 let adjustState={id:null,dataUrl:null,zoom:1,px:50,py:50};
