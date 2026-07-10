@@ -620,17 +620,27 @@ h1::after{content:'⚡';margin-left:6px}
   font-weight:bold;
 }
 #preview-wrap{
-  width:200px;height:200px;border-radius:50%;overflow:hidden;
+  width:280px;height:280px;border-radius:16px;overflow:hidden;
   margin:0 auto 16px;position:relative;
   border:3px solid rgba(255,215,0,.3);
   background:#1a1a2e;
+  touch-action:none;
 }
 #preview-img{
   width:100%;height:100%;position:absolute;inset:0;
   background-size:cover;background-position:center;background-repeat:no-repeat;
-  cursor:grab;
+  pointer-events:none;
 }
-#preview-img.dragging{cursor:grabbing}
+#crop-circle{
+  position:absolute;border-radius:50%;
+  border:3px solid #FFD700;
+  box-shadow:0 0 0 9999px rgba(0,0,0,.55);
+  cursor:grab;z-index:5;
+  transform:translate(-50%,-50%);
+  width:140px;height:140px;
+  touch-action:none;user-select:none;
+}
+#crop-circle.dragging{cursor:grabbing}
 #adjust-modal .zoom-area{
   display:flex;align-items:center;gap:10px;margin-bottom:18px;
 }
@@ -719,14 +729,15 @@ h1::after{content:'⚡';margin-left:6px}
 <div id="adjust-modal">
   <div class="modal-bg" id="modal-bg-close"></div>
   <div class="modal-box">
-    <div class="modal-title">📐 調整頭像位置</div>
+    <div class="modal-title">📐 移動圓圈選取頭像範圍</div>
     <div id="preview-wrap">
       <div id="preview-img"></div>
+      <div id="crop-circle"></div>
     </div>
     <div class="zoom-area">
-      <label>🔍 縮放</label>
-      <input type="range" id="zoom-slider" min="1" max="3" step="0.05" value="1">
-      <span id="zoom-label" style="font-size:.75rem;color:rgba(255,255,255,.3);min-width:32px">1x</span>
+      <label>🔘 圓圈大小</label>
+      <input type="range" id="size-slider" min="60" max="260" step="1" value="140">
+      <span id="size-label" style="font-size:.75rem;color:rgba(255,255,255,.3);min-width:40px">140px</span>
     </div>
     <div class="modal-btns">
       <button class="btn-cancel" id="adjust-cancel">取消</button>
@@ -768,12 +779,13 @@ const replayBtn=document.getElementById('replay-btn');
 
 /* ---- image related ---- */
 const overlay=document.getElementById('overlay');
-const camPick=document.getElementById('camPick');
-const galPick=document.getElementById('galPick');
+let camPick=document.getElementById('camPick');
+let galPick=document.getElementById('galPick');
 const adjustModal=document.getElementById('adjust-modal');
 const previewImg=document.getElementById('preview-img');
-const zoomSlider=document.getElementById('zoom-slider');
-const zoomLabel=document.getElementById('zoom-label');
+const cropCircle=document.getElementById('crop-circle');
+const sizeSlider=document.getElementById('size-slider');
+const sizeLabel=document.getElementById('size-label');
 
 function lsKey(id){return 'fair-rps-char-'+id}
 
@@ -785,7 +797,11 @@ function getCustom(id){
 }
 
 function setCustom(id,data){
-  localStorage.setItem(lsKey(id),JSON.stringify(data));
+  try{
+    localStorage.setItem(lsKey(id),JSON.stringify(data));
+  }catch(e){
+    console.warn('localStorage save failed',e);
+  }
 }
 
 function removeCustom(id){
@@ -808,10 +824,7 @@ c9:`<div class="hair"></div><div class="hair-wave"></div><div class="skin"></div
 function charInnerHTML(cls,id){
   const c=getCustom(id);
   if(c&&c.dataUrl){
-    const z=c.zoom||1;
-    const px=c.px||50;
-    const py=c.py||50;
-    return `<div class="custom-face" style="background-image:url('${c.dataUrl}');background-position:${px}% ${py}%;background-size:${z*100}% auto;background-repeat:no-repeat"></div>`;
+    return `<div class="custom-face" style="background-image:url('${c.dataUrl}');background-size:cover;background-position:center"></div>`;
   }
   return CHAR_HTML[cls]||'';
 }
@@ -1035,15 +1048,43 @@ function selectSettingsChar(id){
   settingsActions.classList.add('show');
 }
 
+function compressImage(dataUrl,maxSize,cb){
+  const img=new Image();
+  img.onload=()=>{
+    let w=img.width,h=img.height;
+    if(w>maxSize||h>maxSize){
+      const r=Math.min(maxSize/w,maxSize/h);
+      w*=r;h*=r;
+    }
+    const c=document.createElement('canvas');
+    c.width=w;c.height=h;
+    c.getContext('2d').drawImage(img,0,0,w,h);
+    cb(c.toDataURL('image/jpeg',0.7));
+  };
+  img.src=dataUrl;
+}
+
+function resetFileInput(el){
+  const clone=el.cloneNode(true);
+  el.parentNode.replaceChild(clone,el);
+  clone.addEventListener('change',handleFilePick);
+  if(el.id==='camPick') camPick=clone;
+  else if(el.id==='galPick') galPick=clone;
+}
+
 function handleFilePick(e){
   const file=e.target.files[0];
   const id=settingsCharId;
   if(!file||id==null) return;
   settingsModal.classList.remove('show');
   settingsCharId=null;
-  e.target.value='';
+  resetFileInput(e.target);
   const reader=new FileReader();
-  reader.onload=ev=>{openAdjustModal(id,ev.target.result)};
+  reader.onload=ev=>{
+    compressImage(ev.target.result,400,smallUrl=>{
+      openAdjustModal(id,smallUrl);
+    });
+  };
   reader.readAsDataURL(file);
 }
 
@@ -1080,34 +1121,71 @@ document.getElementById('settings-reset').addEventListener('touchstart',e=>{
 },{passive:false});
 
 /* ====== adjust modal ====== */
-let adjustState={id:null,dataUrl:null,zoom:1,px:50,py:50};
-let dragState={active:false,startX:0,startY:0,startPx:50,startPy:50};
+const CS=280;
+let adjustState={id:null,dataUrl:null,circleSize:140,cx:CS/2,cy:CS/2};
+let dragState={active:false,startX:0,startY:0,startCx:CS/2,startCy:CS/2};
+
+function updateCircleUI(){
+  cropCircle.style.width=adjustState.circleSize+'px';
+  cropCircle.style.height=adjustState.circleSize+'px';
+  cropCircle.style.left=adjustState.cx+'px';
+  cropCircle.style.top=adjustState.cy+'px';
+}
+
+function constrainCircle(){
+  const r=adjustState.circleSize/2;
+  adjustState.cx=Math.max(r,Math.min(CS-r,adjustState.cx));
+  adjustState.cy=Math.max(r,Math.min(CS-r,adjustState.cy));
+}
+
+function cropCircleImage(dataUrl,cx,cy,circleSize,outputSize,cb){
+  const img=new Image();
+  img.onload=()=>{
+    const iw=img.width,ih=img.height;
+    const s=Math.max(CS/iw,CS/ih);
+    const dw=iw*s,dh=ih*s;
+    const ox=(CS-dw)/2,oy=(CS-dh)/2,r=circleSize/2;
+    const icx=(cx-ox)/s,icy=(cy-oy)/s,ir=r/s;
+    const side=Math.min(ir,icx,icy,iw-icx,ih-icy)*2;
+    const sx=icx-side/2,sy=icy-side/2;
+    const c=document.createElement('canvas');
+    c.width=outputSize;c.height=outputSize;
+    c.getContext('2d').drawImage(img,sx,sy,side,side,0,0,outputSize,outputSize);
+    cb(c.toDataURL('image/jpeg',0.85));
+  };
+  img.src=dataUrl;
+}
 
 function openAdjustModal(id,dataUrl){
   state.adjustCharId=id;
   adjustState.id=id;
   adjustState.dataUrl=dataUrl;
-  adjustState.zoom=1;
-  adjustState.px=50;
-  adjustState.py=50;
-  zoomSlider.value=1;
-  zoomLabel.textContent='1x';
+  adjustState.circleSize=140;
+  adjustState.cx=CS/2;
+  adjustState.cy=CS/2;
+  sizeSlider.value=140;
+  sizeLabel.textContent='140px';
   previewImg.style.backgroundImage=`url('${dataUrl}')`;
   previewImg.style.backgroundSize='cover';
-  previewImg.style.backgroundPosition='50% 50%';
+  previewImg.style.backgroundPosition='center';
+  updateCircleUI();
   overlay.classList.add('show');
   adjustModal.classList.add('show');
 }
 
 function closeAdjustModal(save){
   if(save){
-    setCustom(adjustState.id,{
-      dataUrl:adjustState.dataUrl,
-      zoom:adjustState.zoom,
-      px:adjustState.px,
-      py:adjustState.py,
+    const ci=adjustState.id,cd=adjustState.dataUrl;
+    const cx=adjustState.cx,cy=adjustState.cy,cs=adjustState.circleSize;
+    overlay.classList.remove('show');
+    adjustModal.classList.remove('show');
+    previewImg.style.backgroundImage='';
+    cropCircleImage(cd,cx,cy,cs,150,cropped=>{
+      setCustom(ci,{dataUrl:cropped});
+      renderPool();renderPlayers();
+      state.adjustCharId=null;
     });
-    renderPool();renderPlayers();
+    return;
   }
   overlay.classList.remove('show');
   adjustModal.classList.remove('show');
@@ -1115,63 +1193,56 @@ function closeAdjustModal(save){
   state.adjustCharId=null;
 }
 
-zoomSlider.addEventListener('input',()=>{
-  const z=parseFloat(zoomSlider.value);
-  zoomLabel.textContent=z.toFixed(1)+'x';
-  adjustState.zoom=z;
-  previewImg.style.backgroundSize=(z*100)+'% auto';
+sizeSlider.addEventListener('input',()=>{
+  const v=parseInt(sizeSlider.value);
+  sizeLabel.textContent=v+'px';
+  adjustState.circleSize=v;
+  constrainCircle();
+  updateCircleUI();
 });
 
-previewImg.addEventListener('mousedown',e=>{
+cropCircle.addEventListener('mousedown',e=>{
   dragState.active=true;
   dragState.startX=e.clientX;
   dragState.startY=e.clientY;
-  dragState.startPx=adjustState.px;
-  dragState.startPy=adjustState.py;
-  previewImg.classList.add('dragging');
+  dragState.startCx=adjustState.cx;
+  dragState.startCy=adjustState.cy;
+  cropCircle.classList.add('dragging');
 });
 document.addEventListener('mousemove',e=>{
   if(!dragState.active) return;
   const dx=e.clientX-dragState.startX;
   const dy=e.clientY-dragState.startY;
-  const z=adjustState.zoom;
-  const moveX=(dx/(200*z))*100;
-  const moveY=(dy/(200*z))*100;
-  let newPx=Math.max(0,Math.min(100,dragState.startPx+moveX));
-  let newPy=Math.max(0,Math.min(100,dragState.startPy+moveY));
-  adjustState.px=newPx;
-  adjustState.py=newPy;
-  previewImg.style.backgroundPosition=newPx+'% '+newPy+'%';
+  adjustState.cx=Math.max(0,Math.min(CS,dragState.startCx+dx));
+  adjustState.cy=Math.max(0,Math.min(CS,dragState.startCy+dy));
+  constrainCircle();
+  updateCircleUI();
 });
 document.addEventListener('mouseup',()=>{
   if(!dragState.active) return;
   dragState.active=false;
-  previewImg.classList.remove('dragging');
+  cropCircle.classList.remove('dragging');
 });
 
-previewImg.addEventListener('touchstart',e=>{
+cropCircle.addEventListener('touchstart',e=>{
   const t=e.touches[0];
   dragState.active=true;
   dragState.startX=t.clientX;
   dragState.startY=t.clientY;
-  dragState.startPx=adjustState.px;
-  dragState.startPy=adjustState.py;
+  dragState.startCx=adjustState.cx;
+  dragState.startCy=adjustState.cy;
 },{passive:true});
-previewImg.addEventListener('touchmove',e=>{
+document.addEventListener('touchmove',e=>{
   if(!dragState.active||e.touches.length!==1) return;
   const t=e.touches[0];
   const dx=t.clientX-dragState.startX;
   const dy=t.clientY-dragState.startY;
-  const z=adjustState.zoom;
-  const moveX=(dx/(200*z))*100;
-  const moveY=(dy/(200*z))*100;
-  let newPx=Math.max(0,Math.min(100,dragState.startPx+moveX));
-  let newPy=Math.max(0,Math.min(100,dragState.startPy+moveY));
-  adjustState.px=newPx;
-  adjustState.py=newPy;
-  previewImg.style.backgroundPosition=newPx+'% '+newPy+'%';
+  adjustState.cx=Math.max(0,Math.min(CS,dragState.startCx+dx));
+  adjustState.cy=Math.max(0,Math.min(CS,dragState.startCy+dy));
+  constrainCircle();
+  updateCircleUI();
 },{passive:true});
-previewImg.addEventListener('touchend',()=>{
+cropCircle.addEventListener('touchend',()=>{
   dragState.active=false;
 });
 
