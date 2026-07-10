@@ -779,8 +779,8 @@ const replayBtn=document.getElementById('replay-btn');
 
 /* ---- image related ---- */
 const overlay=document.getElementById('overlay');
-let camPick=document.getElementById('camPick');
-let galPick=document.getElementById('galPick');
+const camPick=document.getElementById('camPick');
+const galPick=document.getElementById('galPick');
 const adjustModal=document.getElementById('adjust-modal');
 const previewImg=document.getElementById('preview-img');
 const cropCircle=document.getElementById('crop-circle');
@@ -1064,21 +1064,13 @@ function compressImage(dataUrl,maxSize,cb){
   img.src=dataUrl;
 }
 
-function resetFileInput(el){
-  const clone=el.cloneNode(true);
-  el.parentNode.replaceChild(clone,el);
-  clone.addEventListener('change',handleFilePick);
-  if(el.id==='camPick') camPick=clone;
-  else if(el.id==='galPick') galPick=clone;
-}
-
 function handleFilePick(e){
   const file=e.target.files[0];
   const id=settingsCharId;
   if(!file||id==null) return;
   settingsModal.classList.remove('show');
   settingsCharId=null;
-  resetFileInput(e.target);
+  e.target.value='';
   const reader=new FileReader();
   reader.onload=ev=>{
     compressImage(ev.target.result,400,smallUrl=>{
